@@ -1,26 +1,40 @@
-'use client'
-
+import {Button, Col, Modal, ModalBody, ModalFooter, ModalHeader, Row} from "reactstrap";
+import {useListActions} from "@/contexts/listActionContext";
+import listAction from "@/core/listAction";
 import {useForm} from "react-hook-form";
-import {Button, Col, Row} from "reactstrap";
 import {post} from "@/core/httpClient";
-import {useTestActions} from "@/contexts/testContext";
-import testAction from "@/core/testAction";
+import {useEffect} from "react";
 
-export default function UserCreate() {
+const UpdateUserDialog = ({isOpen}) => {
+    const {state, dispatch} = useListActions();
+
+    const toggle = () => dispatch({
+        type: listAction.RESET
+    });
 
     const {
         register,
         watch,
         handleSubmit,
-        formState: {errors}
+        formState: {errors},
+        setValue
     } = useForm({
         mode: "onSubmit",
+        defaultValues: state.row
     });
 
-    const {state, dispatch} = useTestActions();
+    useEffect(() => {
+        setValue("firstName", state.row.firstName);
+        setValue("lastName", state.row.lastName);
+        setValue("email", state.row.email);
+        setValue("id", state.row.id);
+        setValue("contactNumber", state.row.contactNumber);
+    }, [state]);
 
-        return (
-            <>
+    return (
+        <Modal isOpen={isOpen} toggle={toggle}>
+            <ModalHeader toggle={toggle}>Modal title</ModalHeader>
+            <ModalBody>
                 <Row className="mb-3">
                     <Col md={6}>
                         <input type="text" className="form-control" placeholder="First name" {...register("firstName", {
@@ -54,10 +68,10 @@ export default function UserCreate() {
                     </Col>
                     <Col md={6}>
                         <input type="text" className="form-control"
-                               placeholder="Contanct number" {...register("contactNumber", {
+                               placeholder="Contact number" {...register("contactNumber", {
                             required: "Contact number is required!",
                             maxLength: 14,
-                            minLength: 8,
+                            minLength: 9,
                             validate: (value) => {
                                 if (!/^[0-9]*$/.test(value)) {
                                     return "You can enter only numbers";
@@ -69,18 +83,24 @@ export default function UserCreate() {
                         )}
                     </Col>
                 </Row>
-                <Row>
-                    <Col md="12" className="d-flex justify-content-end">
-                        <Button className="btn btn-primary" type="button" onClick={() => {
-                            handleSubmit(async (data) => {
-                                await post("/user/create-user-body", data);
-                            })();
-                        }}>
-                            Submit
-                        </Button>
-                    </Col>
-                </Row>
-            </>
-        );
-
+            </ModalBody>
+            <ModalFooter>
+                <Button className="btn btn-success" type="button" onClick={() => {
+                    handleSubmit(async (data) => {
+                        await post("/user/update", data);
+                        dispatch({
+                            type: listAction.RELOAD
+                        })
+                    })();
+                }}>
+                    Submit
+                </Button>
+                <Button color="secondary" onClick={toggle}>
+                    Cancel
+                </Button>
+            </ModalFooter>
+        </Modal>
+    );
 }
+
+export default UpdateUserDialog;
