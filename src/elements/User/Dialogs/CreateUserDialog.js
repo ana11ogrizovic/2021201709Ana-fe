@@ -3,10 +3,10 @@ import {useListActions} from "@/contexts/listActionContext";
 import listAction from "@/core/listAction";
 import {useForm} from "react-hook-form";
 import {post} from "@/core/httpClient";
-import {useEffect} from "react";
+import {toast} from "react-toastify";
 
-const UpdateUserDialog = ({isOpen}) => {
-    const {state, dispatch} = useListActions();
+const CreateUserDialog = ({isOpen}) => {
+    const {dispatch} = useListActions();
 
     const toggle = () => dispatch({
         type: listAction.RESET
@@ -19,24 +19,15 @@ const UpdateUserDialog = ({isOpen}) => {
         formState: {errors},
         setValue
     } = useForm({
-        mode: "onSubmit",
-        defaultValues: state.row
+        mode: "onSubmit"
     });
-
-    useEffect(() => {
-        setValue("firstName", state.row.firstName);
-        setValue("lastName", state.row.lastName);
-        setValue("email", state.row.email);
-        setValue("id", state.row.id);
-        setValue("contactNumber", state.row.contactNumber);
-    }, [state]);
 
     return (
         <Modal isOpen={isOpen} toggle={toggle}>
             <ModalHeader toggle={toggle}>Modal title</ModalHeader>
             <ModalBody>
                 <Row className="mb-3">
-                    <Col md={6}>
+                    <Col md={6} className="mb-1">
                         <input type="text" className="form-control" placeholder="First name" {...register("firstName", {
                             required: "First name is required!",
                             maxLength: 50,
@@ -58,7 +49,7 @@ const UpdateUserDialog = ({isOpen}) => {
                     </Col>
                 </Row>
                 <Row className="mb-3">
-                    <Col md={6}>
+                    <Col md={6} className="mb-1">
                         <input type="text" className="form-control" placeholder="Email" {...register("email", {
                             required: "Email is required!"
                         })} />
@@ -83,14 +74,29 @@ const UpdateUserDialog = ({isOpen}) => {
                         )}
                     </Col>
                 </Row>
+                <Row className="mb-3">
+                    <Col md={6} className="mb-1">
+                        <input type="password" className="form-control" placeholder="Password" {...register("password", {
+                            required: "Password is required!"
+                        })} />
+                        {errors && errors.password && (
+                            <span className="text-danger">{errors.password.message}</span>
+                        )}
+                    </Col>
+                    <Col md={6}></Col>
+                </Row>
             </ModalBody>
             <ModalFooter>
                 <Button className="btn btn-success" type="button" onClick={() => {
                     handleSubmit(async (data) => {
-                        await post("/user/update", data);
-                        dispatch({
-                            type: listAction.RELOAD
-                        })
+                        let result = await post("/user/create", data);
+
+                        if (result && result.status === 200) {
+                            toast.success("Successfully created!");
+                            dispatch({
+                                type: listAction.RELOAD
+                            });
+                        }
                     })();
                 }}>
                     Submit
@@ -103,4 +109,4 @@ const UpdateUserDialog = ({isOpen}) => {
     );
 }
 
-export default UpdateUserDialog;
+export default CreateUserDialog;
