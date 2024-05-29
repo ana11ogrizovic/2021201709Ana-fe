@@ -2,8 +2,9 @@ import {Button, Col, Modal, ModalBody, ModalFooter, ModalHeader, Row} from "reac
 import {useListActions} from "@/contexts/listActionContext";
 import listAction from "@/core/listAction";
 import {useForm} from "react-hook-form";
-import {post} from "@/core/httpClient";
 import {useEffect} from "react";
+import {post, put} from "@/core/httpClient";
+import {toast, ToastContainer} from "react-toastify";
 
 const UpdateUserDialog = ({isOpen}) => {
     const {state, dispatch} = useListActions();
@@ -36,7 +37,7 @@ const UpdateUserDialog = ({isOpen}) => {
             <ModalHeader toggle={toggle}>Modal title</ModalHeader>
             <ModalBody>
                 <Row className="mb-3">
-                    <Col md={6}>
+                    <Col md={6} className="mb-1">
                         <input type="text" className="form-control" placeholder="First name" {...register("firstName", {
                             required: "First name is required!",
                             maxLength: 50,
@@ -58,7 +59,7 @@ const UpdateUserDialog = ({isOpen}) => {
                     </Col>
                 </Row>
                 <Row className="mb-3">
-                    <Col md={6}>
+                    <Col md={6} className="mb-1">
                         <input type="text" className="form-control" placeholder="Email" {...register("email", {
                             required: "Email is required!"
                         })} />
@@ -67,11 +68,10 @@ const UpdateUserDialog = ({isOpen}) => {
                         )}
                     </Col>
                     <Col md={6}>
-                        <input type="text" className="form-control"
-                               placeholder="Contact number" {...register("contactNumber", {
-                            required: "Contact number is required!",
-                            maxLength: 14,
-                            minLength: 9,
+                        <input type="password" className="form-control"
+                               placeholder="Password" {...register("password", {
+                            required: "Password number is required!",
+
                             validate: (value) => {
                                 if (!/^[0-9]*$/.test(value)) {
                                     return "You can enter only numbers";
@@ -83,14 +83,31 @@ const UpdateUserDialog = ({isOpen}) => {
                         )}
                     </Col>
                 </Row>
+                <Row className="mb-3">
+                    <Col md={6} className="mb-1">
+                        <input type="password" className="form-control"
+                               placeholder="Password" {...register("password", {
+                            required: "Password is required!"
+                        })} />
+                        {errors && errors.password && (
+                            <span className="text-danger">{errors.password.message}</span>
+                        )}
+                    </Col>
+                    <Col md={6}></Col>
+                </Row>
+
             </ModalBody>
             <ModalFooter>
                 <Button className="btn btn-success" type="button" onClick={() => {
                     handleSubmit(async (data) => {
-                        await post("/user/update", data);
-                        dispatch({
-                            type: listAction.RELOAD
-                        })
+                        let result = await put("/user/update", data);
+
+                        if (result && result.status === 200) {
+                            toast.success("Successfully updated!");
+                            dispatch({
+                                type: listAction.RELOAD
+                            });
+                        }
                     })();
                 }}>
                     Submit
