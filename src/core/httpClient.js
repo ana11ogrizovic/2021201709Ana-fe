@@ -9,6 +9,14 @@ export const Axios = axios.create({
     },
 });
 
+export const AxiosAuth = axios.create({
+    baseURL: 'http://localhost:8080',
+    timeout: 150000000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
 export const get = async (url, params) => {
     return await Axios.get(url, {params});
 }
