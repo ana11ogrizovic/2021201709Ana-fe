@@ -1,6 +1,18 @@
 import {withAuth} from "next-auth/middleware";
 import {NextResponse} from "next/server";
 
+import roles from "@/core/roles";
+
+export default withAuth(
+    function middleware(req) {
+        let isEmployee = req.nextauth.decoded?.roles.some(role => role.authority === roles.EMPLOYEE);
+
+        if (req.nextUrl.pathname.startsWith("/user/list") && isEmployee)
+            return NextResponse.rewrite(
+                new URL("/api/auth/signin?message=You Are Not Authorized!", req.url)
+                );
+
+
 export default withAuth(
     function middleware(req) {
 
@@ -27,6 +39,7 @@ export default withAuth(
             return NextResponse.rewrite(
                 new URL("/auth/login?message=You Are Not Authorized!", req.url)
             );
+
     },
     {
         callbacks: {
@@ -36,6 +49,10 @@ export default withAuth(
 );
 
 export const config = {
+
+    matcher: ["/user/:path*"],
+
     matcher: ["/admin/:path*", "/users/:path*", "/employee/:path*"],
     // matcher: ["/user/:path*"],
+
 };

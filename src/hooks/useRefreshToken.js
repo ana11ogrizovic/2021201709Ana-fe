@@ -1,6 +1,9 @@
 import {signIn, useSession} from "next-auth/react";
 import {post} from "@/core/httpClient";
 
+import storageKey from "@/core/storageKey";
+
+
 export const useRefreshToken = () => {
     const {data: session, update} = useSession();
 
@@ -20,6 +23,15 @@ export const useRefreshToken = () => {
                     refreshToken: resp.data.refreshToken
                 },
             });
+
+            sessionStorage.setItem(storageKey.TOKEN, resp.data.token);
+            sessionStorage.setItem(storageKey.REFRESH_TOKEN, resp.data.refreshToken);
+
+
+            return {token: resp.data.token};
+        } else {
+            sessionStorage.removeItem(storageKey.TOKEN);
+            sessionStorage.removeItem(storageKey.REFRESH_TOKEN);
 
             return {token: resp.data.token};
         } else {
