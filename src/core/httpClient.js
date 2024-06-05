@@ -1,6 +1,8 @@
 import axios from "axios";
 import {toast} from "react-toastify";
+
 import {config} from "@/middleware";
+
 
 export const Axios = axios.create({
     baseURL: 'http://localhost:8080',
@@ -25,6 +27,11 @@ export const get = async (url, params) => {
 export const post = async (url, params, conifg) => {
     try {
         return await Axios.post(url, params,config);
+
+export const post = async (url, params) => {
+    try {
+        return await Axios.post(url, params);
+
     } catch {
         toast.error("Unsuccessfully!");
     }
